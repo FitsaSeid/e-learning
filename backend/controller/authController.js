@@ -73,6 +73,7 @@ const tokenGenerator = (dataToBeDecoded) => {
 }
 
 const refreshToken = async (req, res) => {
+
     const { refreshToken } = req.cookies;
     if (!refreshToken) return res.sendStatus(401);
 

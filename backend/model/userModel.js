@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String, require: true },
     email: { type: String, require: true, unique: true },
     password: { type: String, require: true },
-    refreshToken: { type: String },
+    refreshToken: { type: String }
 });
 
 module.exports = mongoose.model("UserModel", userSchema);
