@@ -28,8 +28,9 @@ const getQuestion = async (req, res) => {
 }
 const addQuestion = async (req, res) => {
 
-    const { question, questionAbout, questionType, choice, answer } = req.body;
+    let { question, questionAbout, questionType, choice, answer } = req.body;
 
+    answer = answer.toLowerCase();
     if (!question || !questionAbout || !questionType || !choice || !answer)
         return res.status(404).json({ message: "All attributes must be filled." })
 
@@ -63,7 +64,14 @@ const updateQuestion = async (req, res) => {
 
     const { id } = req.params;
 
-    const data = req.body;
+    if (req.body.answer)
+        req.body = {
+            ...req.body,
+            answer: req.body?.answer?.toLowerCase()
+        }
+
+    let data = req.body;
+
     try {
         const result = await QuestionModel.updateOne({ _id: id }, data);
 

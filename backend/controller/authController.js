@@ -43,7 +43,7 @@ const signIn = async (req, res) => {
     };
 
     const accessToken = tokenGenerator(dataToBeDecoded);
-    const refreshToken = jwt.sign(dataToBeDecoded, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, { expiresIn: '30m' });
+    const refreshToken = jwt.sign(dataToBeDecoded, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, { expiresIn: '1d' });
 
     let encodedRT = crypto.AES.encrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
     encodedRT = encodedRT.toString();
