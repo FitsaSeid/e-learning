@@ -3,7 +3,7 @@ import { setCredentials } from '../features/authSlice';
 
 const baseQuery = fetchBaseQuery({
     baseUrl: "http://localhost:5000",
-    credentials: true,
+    credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
         const token = getState().auth.token;
         if (token)
@@ -12,14 +12,14 @@ const baseQuery = fetchBaseQuery({
     }
 })
 
-const baseQueryWithRefreshToken = async (api, args, extraOptions) => {
-    const result = await baseQuery(api, args, extraOptions);
+const baseQueryWithRefreshToken = async (args, api, extraOptions) => {
+    let result = await baseQuery(args, api, extraOptions);
 
     if (result?.error) {
-        const newToken = await baseQuery('/refresh', args, extraOptions);
+        const newToken = await baseQuery('/refresh', api, extraOptions);
         if (newToken) {
             api.dispatch(setCredentials({ token: newToken?.data?.accessToken }));
-            newToken = await baseQuery('/refresh', args, extraOptions);
+            result = await baseQuery(args, api, extraOptions);
         }
     }
     return result;

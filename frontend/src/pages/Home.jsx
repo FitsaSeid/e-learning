@@ -1,46 +1,189 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import styled from 'styled-components';
-
+import { message, Button } from 'antd';
+import { LoadingOutlined, NotificationOutlined } from '@ant-design/icons';
+import { useLoginMutation, useSignUpMutation } from '../api/endpoints/authApiSlice';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../features/authSlice';
 const Home = () => {
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSignUp, setIsSignUp] = useState(true);
+
+    const [signUp] = useSignUpMutation();
+    const [login] = useLoginMutation();
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [credentials, setCredential] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirm_password: ''
+    })
+    const [loginInput, setLoginInput] = useState({
+        email: '',
+        password: ''
+    })
+
+    const inputHandler = (e) => {
+        setCredential({
+            ...credentials,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const loginInputHandler = (e) => {
+        setLoginInput({
+            ...loginInput,
+            [e.target.name]: e.target.value
+        })
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            if (credentials.password !== credentials.confirm_password)
+                return message.error('Please confirm your password correctly');
+
+            const { firstName, lastName, email, password } = credentials;
+            const res = await signUp({ firstName, lastName, email, password }).unwrap();
+
+            if (res) {
+                setIsLoading(false);
+                dispatch(setCredentials({ token: res.accessToken, firstName: res.firstName }))
+                navigate('/dashboard', { replace: true })
+            }
+        } catch (error) {
+            setIsLoading(false);
+            message.error(error?.data?.message)
+        }
+    }
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        setIsLoading(true);
+
+        try {
+            const res = await login(loginInput).unwrap();
+            setIsLoading(false);
+            if (res) {
+                setIsLoading(false);
+                dispatch(setCredentials({ token: res.accessToken, firstName: res.firstName }))
+                navigate('/dashboard')
+            }
+        } catch (error) {
+            setIsLoading(false);
+            message.error(error?.data?.message)
+        }
+    }
     return (
         <>
             <Header />
-            <Wrapper>
-                <div className="home">
-                    <div className="home__col1">
-                        <div className="home_title">
-                            <h3 >Evangadi say's</h3>
+            {
+                <Wrapper>
+                    <div className="home">
+                        <div className="home__col1">
+                            <div className="home_title">
+                                <h3 >Evangadi say's</h3>
 
-                            <h1>"Practice Will <span>Makes You</span> <span>Perfect"</span></h1>
+                                <h1>"Practice Will <span>Makes You</span> <span>Perfect"</span></h1>
+                            </div>
+                        </div>
+                        <div className="home__col2">
+
+                            {
+                                isSignUp
+                                    ? <div className="form__container">
+                                        <h1 className='sign__up'>Create an Account</h1>
+
+                                        <form action="" onSubmit={handleSubmit}>
+                                            <div className="form__row1">
+                                                <input type="text"
+                                                    name="firstName"
+                                                    id="firstName"
+                                                    placeholder='Enter first name'
+                                                    onChange={inputHandler}
+                                                />
+
+                                                <input type="text"
+                                                    name="lastName"
+                                                    id="lastName"
+                                                    placeholder='Enter last name'
+                                                    onChange={inputHandler}
+                                                />
+                                            </div>
+
+                                            <input type="email"
+                                                name="email"
+                                                id="email"
+                                                placeholder='Enter email'
+                                                onChange={inputHandler}
+                                            />
+
+                                            <div className="form__row2">
+                                                <input type="password"
+                                                    name="password"
+                                                    id="password"
+                                                    placeholder='Enter password'
+                                                    onChange={inputHandler}
+                                                />
+
+                                                <input type="password"
+                                                    name="confirm_password"
+                                                    id="confirm_password"
+                                                    placeholder='Confirm password'
+                                                    onChange={inputHandler}
+                                                />
+                                            </div>
+
+                                            <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "Create an Account"} </button>
+                                            <button type='button' className='login'
+                                                onClick={() => {
+                                                    setIsSignUp(false)
+                                                }}
+                                            > Already have account?</button>
+                                        </form>
+                                    </div> :
+
+                                    <div className="form__container">
+                                        <h1 className='sign__in'>Login to Account</h1>
+
+                                        <form action="" onSubmit={handleLogin} className='sign__in__form'>
+
+                                            <input type="email"
+                                                name="email"
+                                                id="email"
+                                                placeholder='Enter email'
+                                                onChange={loginInputHandler}
+                                            />
+
+                                            <input type="password"
+                                                name="password"
+                                                id="password"
+                                                placeholder='Enter password'
+                                                onChange={loginInputHandler}
+                                            />
+
+                                            <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "LogIn"} </button> <br />
+                                            <button type='button' className='login'
+                                                onClick={() => {
+                                                    setIsSignUp(true)
+                                                }}
+                                            > Create an account</button>
+                                        </form>
+                                    </div>
+                            }
                         </div>
                     </div>
-                    <div className="home__col2">
+                </Wrapper>
+            }
 
-                        <div className="form__container">
-                            <h1 className='sign__up'>Create an Account</h1>
-
-                            <form action="">
-                                <div className="form__row1">
-                                    <input type="text" name="first_name" id="first_name" placeholder='Enter first name' />
-
-                                    <input type="text" name="last_name" id="last_name" placeholder='Enter last name' />
-                                </div>
-
-                                <input type="email" name="email" id="email" placeholder='Enter email' />
-
-                                <div className="form__row2">
-                                    <input type="text" name="password" id="password" placeholder='Enter password' />
-                                    <input type="text" name="confirm_password" id="confirm_password" placeholder='Confirm password' />
-                                </div>
-
-                                <button>Create an account</button>
-                                <button>Already have account?</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </Wrapper>
         </>
     );
 }
@@ -57,9 +200,14 @@ const Wrapper = styled.div`
         text-align: left;
     }
 
-    .sign__up {
+    .sign__up, .sign__in {
         font-size: 24px;
         margin-bottom: 50px;
+    }
+
+    .sign__in__form input {
+        width: 95%;
+        
     }
     h1, span {
         font-size: 100px;
@@ -72,7 +220,7 @@ const Wrapper = styled.div`
     }
 
     .home__col1 {
-        width: 40%;
+        width: 50%;
         background-color: #161515;
     }
     .home__col2 {
@@ -103,7 +251,7 @@ const Wrapper = styled.div`
     }
 
     .form__container {
-        width: 100%;
+        width: 80%;
         height: 700px;
         background-color: #fff;
         box-shadow: 0px -1px 4px 0px rgba(0, 0, 0, 0.4);
@@ -115,7 +263,7 @@ const Wrapper = styled.div`
         margin-top: 150px;
     }
 
-    form {
+    form, .sign__in__form{
        margin: 0 auto;
        width: 90%;
     }
@@ -131,7 +279,7 @@ const Wrapper = styled.div`
         color: "#111"
     }
 
-    input[type=text], input[type=email] {
+    input[type=text], input[type=email], input[type=password] {
         color: #111;
         padding-left: 20px;
     }
@@ -146,6 +294,18 @@ const Wrapper = styled.div`
         padding: 15px;
         background-color: #becb0a;
         border: 1px solid;
+        cursor: pointer;
+    }
+
+    .login {
+        width: 100%;
+        margin-top: 15px;
+        padding: 15px;
+        background-color: transparent;
+        color: #becb0a;
+        border: 1px solid;
+        border: 2px solid #becb0a;
+        cursor: pointer;
     }
     @media (max-width: 1280px) {
 

@@ -6,7 +6,38 @@
     font-family: 'Poppins', sans-serif;
 }
 
-body {
-    min-height: 100vh;
-    background-color: aliceblue;
+
+
+#dark {
+    background-color: #433e47;
+    color: #fff !important;
+}
+
+#dark h3,
+#dark span {
+    color: #fff !important
+}
+
+#dark ol li {
+    color: #a4a4a4 !important
+}
+
+#dark section {
+    background-color: #1f1a24 !important;
+}
+
+#dark main {
+    background-color: #2b2e33 !important;
+}
+
+#dark aside,
+#dark aside li {
+    background-color: #2b2e33 !important;
+    color: #fff;
+}
+
+#dark aside ul {
+    background-color: #2b2e33 !important;
+    color: #fff;
+
 }

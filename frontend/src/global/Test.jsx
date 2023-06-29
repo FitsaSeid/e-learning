@@ -30,7 +30,7 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, i
         }),
     };
 });
-const Sidebar = () => {
+const Test = () => {
     const {
         token: { colorBgContainer },
     } = theme.useToken();
@@ -153,4 +153,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar;
+export default Test;

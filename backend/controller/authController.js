@@ -6,10 +6,11 @@ const crypto = require('crypto-js');
 const userModel = require("../model/userModel");
 
 const signUp = async (req, res) => {
+    console.log(req.body)
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) return res.status(400).json({ message: "Please fill all fields" });
 
-    const isEmailExist = await UserModel.findOne({ email });
+    let isEmailExist = await UserModel.findOne({ email });
     if (isEmailExist) return res.status(400).json({ message: "User already exist" });
 
     const approvedUser = new UserModel({
@@ -19,8 +20,29 @@ const signUp = async (req, res) => {
         password: bcrypt.hashSync(password, 10)
     })
 
-    const registeredUser = await approvedUser.save();
-    res.status(200).json({ data: registeredUser });
+    await approvedUser.save();
+
+    isEmailExist = await UserModel.findOne({ email });
+    if (!isEmailExist) return res.status(401).json({ message: "Something went wrong" });
+
+    const dataToBeDecoded = {
+        id: isEmailExist._id,
+        firstName: isEmailExist.firstName,
+        email: isEmailExist.lastName
+    };
+
+    const accessToken = tokenGenerator(dataToBeDecoded);
+    const refreshToken = jwt.sign(dataToBeDecoded, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, { expiresIn: '1d' });
+
+    let encodedRT = crypto.AES.encrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
+    encodedRT = encodedRT.toString();
+
+    const updateRefreshToken = await UserModel.updateOne({ email }, { refreshToken: encodedRT });
+
+    if (!updateRefreshToken) return res.sendStatus(401);
+
+    res.cookie('refreshToken', encodedRT, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 1000 * 60 * 60 * 72 }).json({ accessToken: accessToken, firstName });
+
 }
 
 const signIn = async (req, res) => {

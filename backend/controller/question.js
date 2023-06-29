@@ -2,9 +2,21 @@ const QuestionModel = require("../model/questionModel")
 
 const getQuestions = async (req, res) => {
     try {
-        const questions = await QuestionModel.find();
+        const questions = await QuestionModel.find().select(['question', 'questionType', 'choice', 'questionAbout']);
 
         if (!questions) return res.status(404).json({ message: "unfortunately, there is no question found" });
+
+        res.status(200).json(questions);
+    } catch (error) {
+        res.status(404).json(error.message);
+    }
+}
+
+const getMCQuestions = async (req, res) => {
+    try {
+        const questions = await QuestionModel.find({ questionType: 'MCQ' }).select(['question', 'questionType', 'choice', 'questionAbout']);
+
+        if (!questions) return res.status(404).json({ message: "unfortunately, there is no MCQs found" });
 
         res.status(200).json(questions);
     } catch (error) {
@@ -17,7 +29,7 @@ const getQuestion = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const question = await QuestionModel.findById(id);
+        const question = await QuestionModel.findById(id).select(['question', 'questionType', 'choice', 'questionAbout']);
 
         if (!question) return res.status(404).json({ message: "The question you're looking for doesn't exist" });
 
@@ -26,6 +38,7 @@ const getQuestion = async (req, res) => {
         res.status(404).json(error.message);
     }
 }
+
 const addQuestion = async (req, res) => {
 
     let { question, questionAbout, questionType, choice, answer } = req.body;
@@ -89,5 +102,6 @@ module.exports = {
     getQuestion,
     addQuestion,
     deleteQuestion,
-    updateQuestion
+    updateQuestion,
+    getMCQuestions
 }

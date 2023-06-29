@@ -7,7 +7,7 @@ const answerRoute = require('./answerRoute');
 
 router.use('/', authRoute);
 router.use('/', authorize, userRoute)
-router.use('/', authorize, questionRoute)
+router.use('/question', authorize, questionRoute)
 router.use('/', authorize, answerRoute)
 
 
