@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import styled from 'styled-components';
 import { message, Button } from 'antd';
 import { LoadingOutlined, NotificationOutlined } from '@ant-design/icons';
 import { useLoginMutation, useSignUpMutation } from '../api/endpoints/authApiSlice';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials } from '../features/authSlice';
 const Home = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(true);
-
+    const { token } = useSelector(state => state.auth);
     const [signUp] = useSignUpMutation();
     const [login] = useLoginMutation();
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (token)
+            navigate(-1)
+    }, [])
 
     const [credentials, setCredential] = useState({
         firstName: '',
@@ -86,102 +91,103 @@ const Home = () => {
         <>
             <Header />
             {
-                <Wrapper>
-                    <div className="home">
-                        <div className="home__col1">
-                            <div className="home_title">
-                                <h3 >Evangadi say's</h3>
+                token ? <h1>Redirecting...</h1> :
+                    <Wrapper>
+                        <div className="home">
+                            <div className="home__col1">
+                                <div className="home_title">
+                                    <h3 >Evangadi say's</h3>
 
-                                <h1>"Practice Will <span>Makes You</span> <span>Perfect"</span></h1>
+                                    <h1>"Practice Will <span>Makes You</span> <span>Perfect"</span></h1>
+                                </div>
                             </div>
-                        </div>
-                        <div className="home__col2">
+                            <div className="home__col2">
 
-                            {
-                                isSignUp
-                                    ? <div className="form__container">
-                                        <h1 className='sign__up'>Create an Account</h1>
+                                {
+                                    isSignUp
+                                        ? <div className="form__container">
+                                            <h1 className='sign__up'>Create an Account</h1>
 
-                                        <form action="" onSubmit={handleSubmit}>
-                                            <div className="form__row1">
-                                                <input type="text"
-                                                    name="firstName"
-                                                    id="firstName"
-                                                    placeholder='Enter first name'
+                                            <form action="" onSubmit={handleSubmit}>
+                                                <div className="form__row1">
+                                                    <input type="text"
+                                                        name="firstName"
+                                                        id="firstName"
+                                                        placeholder='Enter first name'
+                                                        onChange={inputHandler}
+                                                    />
+
+                                                    <input type="text"
+                                                        name="lastName"
+                                                        id="lastName"
+                                                        placeholder='Enter last name'
+                                                        onChange={inputHandler}
+                                                    />
+                                                </div>
+
+                                                <input type="email"
+                                                    name="email"
+                                                    id="email"
+                                                    placeholder='Enter email'
                                                     onChange={inputHandler}
                                                 />
 
-                                                <input type="text"
-                                                    name="lastName"
-                                                    id="lastName"
-                                                    placeholder='Enter last name'
-                                                    onChange={inputHandler}
+                                                <div className="form__row2">
+                                                    <input type="password"
+                                                        name="password"
+                                                        id="password"
+                                                        placeholder='Enter password'
+                                                        onChange={inputHandler}
+                                                    />
+
+                                                    <input type="password"
+                                                        name="confirm_password"
+                                                        id="confirm_password"
+                                                        placeholder='Confirm password'
+                                                        onChange={inputHandler}
+                                                    />
+                                                </div>
+
+                                                <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "Create an Account"} </button>
+                                                <button type='button' className='login'
+                                                    onClick={() => {
+                                                        setIsSignUp(false)
+                                                    }}
+                                                > Already have account?</button>
+                                            </form>
+                                        </div> :
+
+                                        <div className="form__container">
+                                            <h1 className='sign__in'>Login to Account</h1>
+
+                                            <form action="" onSubmit={handleLogin} className='sign__in__form'>
+
+                                                <input type="email"
+                                                    name="email"
+                                                    id="email"
+                                                    placeholder='Enter email'
+                                                    onChange={loginInputHandler}
                                                 />
-                                            </div>
 
-                                            <input type="email"
-                                                name="email"
-                                                id="email"
-                                                placeholder='Enter email'
-                                                onChange={inputHandler}
-                                            />
-
-                                            <div className="form__row2">
                                                 <input type="password"
                                                     name="password"
                                                     id="password"
                                                     placeholder='Enter password'
-                                                    onChange={inputHandler}
+                                                    onChange={loginInputHandler}
                                                 />
 
-                                                <input type="password"
-                                                    name="confirm_password"
-                                                    id="confirm_password"
-                                                    placeholder='Confirm password'
-                                                    onChange={inputHandler}
-                                                />
-                                            </div>
-
-                                            <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "Create an Account"} </button>
-                                            <button type='button' className='login'
-                                                onClick={() => {
-                                                    setIsSignUp(false)
-                                                }}
-                                            > Already have account?</button>
-                                        </form>
-                                    </div> :
-
-                                    <div className="form__container">
-                                        <h1 className='sign__in'>Login to Account</h1>
-
-                                        <form action="" onSubmit={handleLogin} className='sign__in__form'>
-
-                                            <input type="email"
-                                                name="email"
-                                                id="email"
-                                                placeholder='Enter email'
-                                                onChange={loginInputHandler}
-                                            />
-
-                                            <input type="password"
-                                                name="password"
-                                                id="password"
-                                                placeholder='Enter password'
-                                                onChange={loginInputHandler}
-                                            />
-
-                                            <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "LogIn"} </button> <br />
-                                            <button type='button' className='login'
-                                                onClick={() => {
-                                                    setIsSignUp(true)
-                                                }}
-                                            > Create an account</button>
-                                        </form>
-                                    </div>
-                            }
+                                                <button type='submit'> {isLoading ? <LoadingOutlined style={{ fontSize: '20px' }} /> : "LogIn"} </button> <br />
+                                                <button type='button' className='login'
+                                                    onClick={() => {
+                                                        setIsSignUp(true)
+                                                    }}
+                                                > Create an account</button>
+                                            </form>
+                                        </div>
+                                }
+                            </div>
                         </div>
-                    </div>
-                </Wrapper>
+                    </Wrapper>
             }
 
         </>

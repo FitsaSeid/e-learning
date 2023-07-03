@@ -138,7 +138,7 @@ const Sidebar = () => {
                         }}
                     >
                         <Routes >
-                            <Route path='/questions' element={<Question />} />
+                            <Route path='/question' element={<Question />} />
                         </Routes>
                     </Content>
                 </Layout>

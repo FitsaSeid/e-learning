@@ -5,10 +5,10 @@ const verifyMCQAnswers = async (req, res) => {
     const { id: questionId } = req.params;
     const { id: userId } = req.user;
 
-    let { answer } = req.body;
-    answer = answer.toLowerCase();
-
+    console.log(req.body)
     try {
+        let { answer } = req.body;
+        answer = answer.toLowerCase();
         const question = await QuestionModel.findById(questionId);
 
         if (!question) return res.status(404).json({ message: "Question not found" });

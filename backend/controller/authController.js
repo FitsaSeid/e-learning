@@ -10,38 +10,43 @@ const signUp = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) return res.status(400).json({ message: "Please fill all fields" });
 
-    let isEmailExist = await UserModel.findOne({ email });
-    if (isEmailExist) return res.status(400).json({ message: "User already exist" });
+    try {
+        let isEmailExist = await UserModel.findOne({ email });
+        if (isEmailExist) return res.status(400).json({ message: "User already exist" });
 
-    const approvedUser = new UserModel({
-        firstName,
-        lastName,
-        email,
-        password: bcrypt.hashSync(password, 10)
-    })
+        const approvedUser = new UserModel({
+            firstName,
+            lastName,
+            email,
+            password: bcrypt.hashSync(password, 10)
+        })
 
-    await approvedUser.save();
+        await approvedUser.save();
 
-    isEmailExist = await UserModel.findOne({ email });
-    if (!isEmailExist) return res.status(401).json({ message: "Something went wrong" });
+        isEmailExist = await UserModel.findOne({ email });
+        if (!isEmailExist) return res.status(401).json({ message: "Something went wrong" });
 
-    const dataToBeDecoded = {
-        id: isEmailExist._id,
-        firstName: isEmailExist.firstName,
-        email: isEmailExist.lastName
-    };
+        const dataToBeDecoded = {
+            id: isEmailExist._id,
+            firstName: isEmailExist.firstName,
+            email: isEmailExist.lastName
+        };
 
-    const accessToken = tokenGenerator(dataToBeDecoded);
-    const refreshToken = jwt.sign(dataToBeDecoded, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, { expiresIn: '1d' });
+        const accessToken = tokenGenerator(dataToBeDecoded);
+        const refreshToken = jwt.sign(dataToBeDecoded, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, { expiresIn: '1d' });
 
-    let encodedRT = crypto.AES.encrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
-    encodedRT = encodedRT.toString();
+        let encodedRT = crypto.AES.encrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
+        encodedRT = encodedRT.toString();
 
-    const updateRefreshToken = await UserModel.updateOne({ email }, { refreshToken: encodedRT });
+        const updateRefreshToken = await UserModel.updateOne({ email }, { refreshToken: encodedRT });
 
-    if (!updateRefreshToken) return res.sendStatus(401);
+        if (!updateRefreshToken) return res.sendStatus(401);
 
-    res.cookie('refreshToken', encodedRT, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 1000 * 60 * 60 * 72 }).json({ accessToken: accessToken, firstName });
+        res.cookie('refreshToken', encodedRT, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 1000 * 60 * 60 * 72 }).json({ accessToken: accessToken, firstName });
+
+    } catch (error) {
+        res.status(400).json(error)
+    }
 
 }
 
@@ -96,27 +101,30 @@ const tokenGenerator = (dataToBeDecoded) => {
 
 const refreshToken = async (req, res) => {
 
-    const { refreshToken } = req.cookies;
-    if (!refreshToken) return res.sendStatus(401);
+    try {
+        console.log("Refresh")
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) return res.sendStatus(401);
 
-    const user = await UserModel.findOne({ refreshToken });
-    if (!user) return res.status(401);
+        const user = await UserModel.findOne({ refreshToken });
+        if (!user) return res.status(401);
 
-    let decodedRT = crypto.AES.decrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
-    decodedRT = decodedRT.toString(crypto.enc.Utf8)
+        let decodedRT = crypto.AES.decrypt(refreshToken, process.env.REFRESH_TOKEN_ENCRYPTION_KEY)
+        decodedRT = decodedRT.toString(crypto.enc.Utf8)
 
-    jwt.verify(decodedRT, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, (error, data) => {
-        const { id, firstName, email } = data;
+        jwt.verify(decodedRT, process.env.JWT_REFRESH_TOKEN_SECRET_KEY, (error, data) => {
+            const { id, firstName, email } = data;
 
-        if (error) return res.status(403);
+            if (error) return res.status(403);
 
-        const newToken = tokenGenerator({ id, firstName, email });
-        if (!newToken) res.status(403).json({ message: "something went wrong" });
+            const newToken = tokenGenerator({ id, firstName, email });
+            if (!newToken) res.status(403).json({ message: "something went wrong" });
 
-        res.status(200).json({ accessToken: newToken });
-    })
-
-
+            res.status(200).json({ accessToken: newToken });
+        })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 module.exports = {

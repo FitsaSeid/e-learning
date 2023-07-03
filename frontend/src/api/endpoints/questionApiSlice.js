@@ -5,8 +5,15 @@ const questionApiSlice = apiSlice.injectEndpoints({
             query: () => ({
                 url: 'api/question/mcq'
             })
+        }),
+        verifyQuestion: builder.mutation({
+            query: ({ question_id, answer }) => ({
+                url: `api/verify-answer/${question_id}`,
+                method: 'POST',
+                body: { ...answer }
+            })
         })
     })
 })
 
-export const { useGetAllMCQuestionsQuery } = questionApiSlice;
+export const { useLazyGetAllMCQuestionsQuery, useGetAllMCQuestionsQuery, useVerifyQuestionMutation } = questionApiSlice;

@@ -16,7 +16,7 @@ const baseQueryWithRefreshToken = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
 
     if (result?.error) {
-        const newToken = await baseQuery('/refresh', api, extraOptions);
+        const newToken = await baseQuery('/api/refresh', api, extraOptions);
         if (newToken) {
             api.dispatch(setCredentials({ token: newToken?.data?.accessToken }));
             result = await baseQuery(args, api, extraOptions);
