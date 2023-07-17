@@ -1,13 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Input, Radio, Space } from 'antd';
+import { Radio, Space } from 'antd';
 import { useState } from 'react';
-import ReactSwitch from 'react-switch';
-import { LaptopOutlined, NotificationOutlined, UserOutlined, BellOutlined } from '@ant-design/icons';
-import NightsStayIcon from '@mui/icons-material/NightsStay';
 import { useSelector } from 'react-redux';
 import { useGetAllMCQuestionsQuery, useVerifyQuestionMutation } from '../api/endpoints/questionApiSlice';
-import UseGetQuestion from '../hooks/useGetQuestion';
+
 const Question = () => {
     const [value, setValue] = useState(1);
     // const [question, setQuestion] = useState({});
@@ -17,13 +14,13 @@ const Question = () => {
     const { data: question, isLoading } = useGetAllMCQuestionsQuery();
     // setQuestion(data);
     const { theme } = useSelector(state => state.theme)
-
+    const [result, setResult] = useState('');
 
     const verifyAnswer = async (e, question_id) => {
         console.log(e.target.value)
         try {
             const result = await verifyQuestion({ question_id, answer: { answer: e.target.value } });
-            console.log(result)
+            setResult(result?.data?.message);
         } catch (error) {
             console.log(error)
         }
@@ -38,7 +35,7 @@ const Question = () => {
                         <div className="question">
                             <Radio.Group onChange={(e) => {
                                 verifyAnswer(e, question[questionNumber]._id);
-                            }} value={value}>
+                            }} >
                                 <Space direction="vertical">
                                     <Radio value="a">{question[questionNumber]?.choice?.a}</Radio>
                                     <Radio value="b">{question[questionNumber]?.choice?.b}</Radio>
@@ -60,22 +57,27 @@ const Question = () => {
 
                     </div>
             }
+
+            {
+                result == 'Correct' ? <h1>Correct</h1> : <h1>Incorrect</h1>
+            }
         </Wrapper>
-
-
     );
 }
 
 
 const Wrapper = styled.div`
     font-size: 1.5rem;
+    h1{color: #111}
     .question__container {
         display: flex;
         flex-direction: column;
+        justify-content: center;
         align-items: center;
         background-color: #f4fafa;
         padding: 30px;
         margin: 20px;
+        height: 50vh;
         border-radius: 15px;
     }
 

@@ -8,6 +8,8 @@ import Test from './global/Test';
 import { useSelector } from 'react-redux';
 import RequireAuth from './auth/RequireAuth';
 import PersistAuth from './auth/PersistAuth';
+import Challenge from './pages/Challenge';
+
 function App() {
   const { theme } = useSelector(state => state.theme)
 
@@ -20,6 +22,7 @@ function App() {
             <Route Component={Sidebar}>
               <Route path='/dashboard' element={<Home />} />
               <Route path='/question' element={<Question />} />
+              <Route path='/challenge' element={<Challenge />} />
             </Route>
           </Route>
         </Route>

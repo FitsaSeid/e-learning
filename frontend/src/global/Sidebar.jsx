@@ -9,12 +9,11 @@ import { Footer } from 'antd/es/layout/layout';
 import ReactSwitch from 'react-switch'
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import Switch from '../components/Switch';
+import { useSelector } from 'react-redux';
+import Challenge from '../pages/Challenge';
 
 const { Header, Content, Sider } = Layout;
-const items1 = ['1', '2', '3'].map((key) => ({
-    key,
-    label: `nav ${key}`,
-}));
+
 const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
     const key = String(index + 1);
     return {
@@ -30,13 +29,26 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, i
         }),
     };
 });
+
+const menus = [
+    {
+        icon: <NotificationOutlined />,
+        label: 'Questions'
+    },
+    {
+        children: [{ key: 1, label: 'test1' }],
+        icon: <NotificationOutlined />,
+        label: 'Test1'
+    }
+]
+console.log(items2)
 const Sidebar = () => {
     const {
         token: { colorBgContainer },
     } = theme.useToken();
 
     const [collapsed, setCollapsed] = useState(false);
-
+    const { theme: themes } = useSelector(state => state.theme)
     return (
         <Layout>
             <Header
@@ -44,7 +56,7 @@ const Sidebar = () => {
                     display: 'flex',
                     alignItems: 'center',
                     height: '45px',
-                    position: 'fixed', zIndex: 99999, width: '100%'
+                    position: 'fixed', zIndex: 99999, width: '100%', backgroundColor: themes === 'light' && '#fff', boxShadow: themes === 'light' && '2px 2px 10px 1px #888888'
                 }}
             >
                 <Link to='/dashboard'>
@@ -91,6 +103,7 @@ const Sidebar = () => {
                         zIndex: 999
                     }}
                 >
+                    <br /> <br />
                     <Menu
                         mode="inline"
                         defaultSelectedKeys={['1']}
@@ -99,17 +112,7 @@ const Sidebar = () => {
                             height: '100%',
                             borderRight: 0,
                         }}
-                        items={items2}
-                    />
-                    <Menu
-                        mode="inline"
-                        defaultSelectedKeys={['1']}
-                        defaultOpenKeys={['sub1']}
-                        style={{
-                            height: '100%',
-                            borderRight: 0,
-                        }}
-                        items={items2}
+                        items={menus}
                     />
                 </Sider>
                 <Layout
@@ -139,6 +142,8 @@ const Sidebar = () => {
                     >
                         <Routes >
                             <Route path='/question' element={<Question />} />
+                            <Route path='/challenge' element={<Challenge />} />
+
                         </Routes>
                     </Content>
                 </Layout>
